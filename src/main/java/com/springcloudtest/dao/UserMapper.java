@@ -1,8 +1,8 @@
-package com.springcloudtest.service;
+package com.springcloudtest.dao;
 
 import com.springcloudtest.domain.User;
 
-public interface UserService {
+public interface UserMapper {
     int deleteByPrimaryKey(Integer id);
 
     int insert(User record);

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.springcloudtest.dao.UserMapper" >
+  <resultMap id="BaseResultMap" type="com.springcloudtest.domain.User" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="user_age" property="userAge" jdbcType="INTEGER" />
+    <result column="version" property="version" jdbcType="VARCHAR" />
+    <result column="user_code" property="userCode" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="create_user" property="createUser" jdbcType="VARCHAR" />
+    <result column="modify_user" property="modifyUser" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="remark2" property="remark2" jdbcType="VARCHAR" />
+    <result column="reserve1" property="reserve1" jdbcType="VARCHAR" />
+    <result column="reserve2" property="reserve2" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_name, user_age, version, user_code, status, create_user, modify_user, create_time, 
+    modify_time, remark, remark2, reserve1, reserve2
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from user
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from user
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.springcloudtest.domain.User" >
+    insert into user (id, user_name, user_age, 
+      version, user_code, status, 
+      create_user, modify_user, create_time, 
+      modify_time, remark, remark2, 
+      reserve1, reserve2)
+    values (#{id,jdbcType=INTEGER}, #{userName,jdbcType=VARCHAR}, #{userAge,jdbcType=INTEGER}, 
+      #{version,jdbcType=VARCHAR}, #{userCode,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, 
+      #{createUser,jdbcType=VARCHAR}, #{modifyUser,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{modifyTime,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR}, #{remark2,jdbcType=VARCHAR}, 
+      #{reserve1,jdbcType=VARCHAR}, #{reserve2,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.springcloudtest.domain.User" >
+    insert into user
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="userName != null" >
+        user_name,
+      </if>
+      <if test="userAge != null" >
+        user_age,
+      </if>
+      <if test="version != null" >
+        version,
+      </if>
+      <if test="userCode != null" >
+        user_code,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createUser != null" >
+        create_user,
+      </if>
+      <if test="modifyUser != null" >
+        modify_user,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="remark2 != null" >
+        remark2,
+      </if>
+      <if test="reserve1 != null" >
+        reserve1,
+      </if>
+      <if test="reserve2 != null" >
+        reserve2,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="userName != null" >
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="userAge != null" >
+        #{userAge,jdbcType=INTEGER},
+      </if>
+      <if test="version != null" >
+        #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="userCode != null" >
+        #{userCode,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createUser != null" >
+        #{createUser,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyUser != null" >
+        #{modifyUser,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="remark2 != null" >
+        #{remark2,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve1 != null" >
+        #{reserve1,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve2 != null" >
+        #{reserve2,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.springcloudtest.domain.User" >
+    update user
+    <set >
+      <if test="userName != null" >
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="userAge != null" >
+        user_age = #{userAge,jdbcType=INTEGER},
+      </if>
+      <if test="version != null" >
+        version = #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="userCode != null" >
+        user_code = #{userCode,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createUser != null" >
+        create_user = #{createUser,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyUser != null" >
+        modify_user = #{modifyUser,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+        modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="remark2 != null" >
+        remark2 = #{remark2,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve1 != null" >
+        reserve1 = #{reserve1,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve2 != null" >
+        reserve2 = #{reserve2,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.springcloudtest.domain.User" >
+    update user
+    set user_name = #{userName,jdbcType=VARCHAR},
+      user_age = #{userAge,jdbcType=INTEGER},
+      version = #{version,jdbcType=VARCHAR},
+      user_code = #{userCode,jdbcType=VARCHAR},
+      status = #{status,jdbcType=VARCHAR},
+      create_user = #{createUser,jdbcType=VARCHAR},
+      modify_user = #{modifyUser,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      remark = #{remark,jdbcType=VARCHAR},
+      remark2 = #{remark2,jdbcType=VARCHAR},
+      reserve1 = #{reserve1,jdbcType=VARCHAR},
+      reserve2 = #{reserve2,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

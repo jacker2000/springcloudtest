@@ -6,17 +6,26 @@ spring:
     name: springcloudtest
   profiles:
       active: test
+#  datasource: #定义数据源
+#      name: tkTest
+#      type: com.zaxxer.hikari.HikariDataSource
+#      url: jdbc:mysql://192.168.246.180:3306/tkTest?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true
+#      username: root  #数据库用户名，root为管理员
+#      password: root  #该数据库用户的密码
+#      driver-class-name: com.mysql.cj.jdbc.Driver
+#      #127.0.0.1为本机测试的ip，3306是mysql的端口号。serverTimezone是定义时区，照抄就好，mysql高版本需要定义这些东西
+#      #useSSL也是某些高版本mysql需要问有没有用SSL连接
   redis:
-    database: 0
-    host: 192.168.246.180
-    port: 6379
-    timeout: 100
-    jedis:
-      pool:
-        max-active: 200
-        max-wait: -1
-        max-idle: 10
-        min-idle: 0
+      database: 0
+      host: 192.168.246.180
+      port: 6379
+      timeout: 1000
+      lettuce:
+          pool:
+            max-active: 100
+            max-wait: 1000
+            max-idle: 50
+            min-idle: 0
 
 
 

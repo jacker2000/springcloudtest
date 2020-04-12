@@ -6,7 +6,7 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度,%msg：日志消息，%n是换行符-->
 
-            <fileNamePattern>mycloudLog_%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>logs/mycloudLog_%d{yyyy-MM-dd}.log</fileNamePattern>
             <!--日志文件保留天数-->
             <maxHistory>30</maxHistory>
         </rollingPolicy>
