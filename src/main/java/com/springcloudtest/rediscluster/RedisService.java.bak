@@ -1,0 +1,48 @@
+package com.springcloudtest.rediscluster;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+public interface RedisService {
+    public boolean setIfAbsent(String key,Object value,long expireTime);
+    Object get(String key);
+    Object getObj(String key);
+
+    Object getStringVlaue(String key);
+    void setStringVlaue(String key,String value);
+    <T> T get(String key, Class<T> clazz);
+
+    void set(String key, Object value);
+    void setObj(String key, Object value);
+
+    void set(String key, Object value, long expireTime);
+
+    void set(String key, Object value, long expireTime, TimeUnit unit);
+
+    void del(String key);
+
+    void del(Collection<String> keys);
+
+    Set<String> keys(String pattern);
+    //从redis 中获取Map返回值
+    boolean existMap(String mapKey,Object hashKey);
+    //取出对应hashKey的value
+    Object getMapHashKeyValue(String mapKey,Object hashKey);
+    //放入各种redis开关hashKey的value（例如保单状态是否查询的开关）
+    void occupMapHashKeyValue(String key,Object mapKey,Object mapValue);
+    Long incr(String key);
+
+    boolean exists(String key);
+
+    Long rpush(String key, List<Object> value);
+
+    Long sadd(String key, Set<Object> value);
+
+    void convertAndSend(String channel, Object message);
+    Object getCattlePolicyInfos(String key);
+    boolean cattleSetIfAbsent(String key, Object value, long expireTime);
+    void cattleDelete(String key);
+
+}

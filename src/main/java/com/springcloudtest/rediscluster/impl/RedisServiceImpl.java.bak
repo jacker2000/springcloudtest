@@ -1,0 +1,319 @@
+package com.springcloudtest.rediscluster.impl;
+
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import com.springcloudtest.rediscluster.RedisService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import javax.annotation.Resource;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+@Configuration
+public class RedisServiceImpl implements RedisService{
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private static final int EXPIRETIME= 86400;//一天：24*60*60  秒为单位
+
+    @Autowired
+    RedisTemplate<String, Object> redisTemplate;
+
+    @Resource(name="redisTemplate2")
+    public StringRedisTemplate stringTemplate;
+
+    @Resource(name="redisTemplateStr")
+    public RedisTemplate<String, Object> redisTemplateStr;
+    @Override
+    @HystrixCommand(defaultFallback = "getFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "500"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public Object get(String key) {
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    @Override
+    public Object getStringVlaue(String key) {
+        return stringTemplate.opsForValue().get(key);
+    }
+    @Override
+    public void setStringVlaue(String key,String value) {
+        stringTemplate.opsForValue().set(key, value);
+    }
+    @Override
+    @HystrixCommand(defaultFallback = "getFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public <T> T get(String key, Class<T> clazz) {
+        return (T) redisTemplate.opsForValue().get(key);
+    }
+
+    @Override
+    @HystrixCommand(defaultFallback = "setFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public void set(String key, Object value) {
+        redisTemplate.opsForValue().set(key, value);
+    }
+
+    @Override
+    @HystrixCommand(defaultFallback = "setFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public void set(String key, Object value, long expireTime) {
+        this.set(key, value, expireTime, TimeUnit.SECONDS);
+    }
+
+    @Override
+    @HystrixCommand(defaultFallback="setFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "500"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public void set(String key, Object value, long expireTime, TimeUnit unit) {
+        redisTemplate.opsForValue().set(key, value, expireTime, unit);
+    }
+
+    @Override
+    @HystrixCommand(fallbackMethod = "delFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public void del(String key) {
+        redisTemplate.delete(key);
+    }
+
+    @Override
+    @HystrixCommand(fallbackMethod = "delFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public void del(Collection<String> keys) {
+        redisTemplate.delete(keys);
+    }
+
+    @Override
+    @HystrixCommand(fallbackMethod = "keysFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public Set<String> keys(String pattern) {
+        return redisTemplate.keys(pattern);
+    }
+    @Override
+    @HystrixCommand(fallbackMethod = "existMapFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public boolean existMap(String mapKey,Object hashKey) {
+        return redisTemplate.opsForHash().hasKey(mapKey, hashKey);
+    }
+    @Override
+    @HystrixCommand(fallbackMethod = "getMapHashKeyValueFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public Object getMapHashKeyValue(String mapKey,Object hashKey) {
+        return redisTemplate.opsForHash().get(mapKey, hashKey);
+    }
+    @Override
+    @HystrixCommand(fallbackMethod = "occupMapHashKeyValue", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public void occupMapHashKeyValue(String key,Object mapKey,Object mapValue) {
+        redisTemplate.opsForHash().put(key, mapKey, mapValue);
+    }
+    @Override
+    @HystrixCommand(fallbackMethod = "incrFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public Long incr(String key) {
+        return redisTemplate.opsForValue().increment(key, 1);
+    }
+
+    @Override
+    @HystrixCommand(fallbackMethod = "existsFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public boolean exists(String key) {
+        return redisTemplate.hasKey(key);
+    }
+
+    @Override
+    @HystrixCommand(fallbackMethod = "rpushFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public Long rpush(String key, List<Object> value) {
+        return redisTemplate.opsForList().rightPushAll(key, value);
+    }
+
+    @Override
+    @HystrixCommand(fallbackMethod = "asddFallback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public Long sadd(String key, Set<Object> value) {
+        return redisTemplate.opsForSet().add(key, value.toArray());
+    }
+
+    @Override
+    public void convertAndSend(String channel, Object message) {
+        redisTemplate.convertAndSend(channel, message);
+    }
+
+    private Object getFallback() {
+        logger.error("redis连接超时");
+        return null;
+    }
+    private Object getMapHashKeyValueFallback(String mapKey,Object hashKey) {
+        logger.error("redis连接超时");
+        return null;
+    }
+
+    private void setFallback() {
+        logger.error("redis连接超时");
+    }
+
+    private void delFallback(String key) {
+        logger.error("redis连接超时");
+    }
+
+    private Set<String> keysFallback(String pattern) {
+        logger.error("redis连接超时");
+        return null;
+    }
+
+    private Long incrFallback(String key) {
+        logger.error("redis连接超时");
+        return null;
+    }
+
+    private boolean existsFallback(String key) {
+        logger.error("redis连接超时");
+        return false;
+    }
+    private boolean existMapFallback(String mapKey,Object hashKey) {
+        logger.error("redis连接超时");
+        return false;
+    }
+
+    private Long rpushFallback(String key, Collection<Object> valueCollection) {
+        logger.error("redis连接超时");
+        return null;
+    }
+
+    private Long saddFallback(String key, Set<Object> value) {
+        logger.error("redis连接超时");
+        return null;
+    }
+
+    @Override
+    @HystrixCommand(fallbackMethod = "setIfAbsentback", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "5000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public boolean setIfAbsent(String key, Object value, long expireTime) {
+		/*boolean flag = redisTemplate.opsForValue().setIfAbsent(key, value);
+		if (flag) {
+			logger.error("==========进入  expire方法");
+			redisTemplate.expire(key, expireTime, TimeUnit.SECONDS);
+		}
+		return flag;*/
+		/*Long SUCCESS = 1L;
+		String script = "if redis.call('setNx',KEYS[1],ARGV[1]) == 1 then return redis.call('expire',KEYS[1],ARGV[2])  else return 0 end";
+		RedisScript<String> redisScript = new DefaultRedisScript<>(script, String.class);
+		Object result = redisTemplate.execute(redisScript, Collections.singletonList(key), value,expireTime);
+		//logger.info("=========获取锁返回值：{}",result);
+		if (SUCCESS.equals(result)) {
+			return true;
+		}
+		return false;*/
+        return redisTemplate.opsForValue().setIfAbsent(key, value, expireTime, TimeUnit.SECONDS);
+    }
+
+    private boolean setIfAbsentback(String key, Object value, long expireTime) {
+        logger.error("=============setIfAbsentback  方法redis连接超时");
+        return false;
+    }
+
+    @Override
+    @HystrixCommand(defaultFallback = "getgetObj", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "500"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    public Object getObj(String key) {
+        return redisTemplateStr.opsForValue().get(key);
+    }
+
+    private Object getgetObj() {
+        logger.error("redis连接超时");
+        return null;
+    }
+
+    @HystrixCommand(defaultFallback = "setserObj", commandProperties = {
+            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE"),
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+            @HystrixProperty(name = "execution.isolation.semaphore.maxConcurrentRequests", value = "100"),
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10") })
+    @Override
+    public void setObj(String key, Object value) {
+        redisTemplateStr.opsForValue().set(key, value);
+    }
+
+    private Object setserObj() {
+        logger.error("redis连接超时");
+        return null;
+    }
+    /**
+     * 途牛独享redis rpush
+     */
+    @Override
+    public boolean cattleSetIfAbsent(String key, Object value, long expireTime) {
+        redisTemplateStr.opsForValue().set(key, value);
+        return redisTemplateStr.expire(key, expireTime, TimeUnit.SECONDS);
+//		return redisTemplateStr.opsForValue().setIfAbsent(key, value, expireTime, TimeUnit.SECONDS);
+    }
+    /**
+     * 途牛独享redis rpush
+     * 查询key 所有
+     */
+    @Override
+    public Object getCattlePolicyInfos(String key) {
+        return redisTemplateStr.opsForValue().get(key);
+    }
+
+    @Override
+    public void cattleDelete(String key) {
+        redisTemplateStr.delete(key);
+    }
+}

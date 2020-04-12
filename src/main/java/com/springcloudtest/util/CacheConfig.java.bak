@@ -1,0 +1,78 @@
+package com.springcloudtest.util;
+
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+
+/**
+ * 缓存配置
+ * <p>
+ * 当存在多个CacheManager时需要使用@Primary注解标注其中一个，作为默认的CacheManager，
+ * 可以通过@CacheConfig、@CachePut、@Cacheable、@CacheEvict注解的cacheManager指定CacheManager，
+ * 如：@CacheConfig(cacheNames = "user",
+ * cacheManager="redisCacheManager")，不指定时使用默认的CacheManager。
+ */
+@Configuration
+@EnableCaching // 开启声明式缓存支持
+public class CacheConfig {
+
+	@Primary
+	@Bean
+	public ConcurrentMapCacheManager concurrentMapCacheManager() {
+		ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
+		return cacheManager;
+	}
+
+	@Bean
+	public RedisCacheManager redisCacheManager(RedisConnectionFactory connectionFactory) {
+		RedisCacheManager redisCacheManager = RedisCacheManager.create(connectionFactory);
+		return redisCacheManager;
+	}
+	@Bean
+	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+		RedisTemplate<String, Object> template = new RedisTemplate<>();
+		template.setConnectionFactory(connectionFactory);
+		template.setKeySerializer(new StringRedisSerializer());
+		template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+		template.setHashKeySerializer(new StringRedisSerializer());
+		template.setHashValueSerializer(new StringRedisSerializer());
+		template.afterPropertiesSet();
+		return template;
+	}
+	@Bean("redisTemplateStr")
+	public RedisTemplate<String, Object> getRedisTemplate(RedisConnectionFactory connectionFactory) {
+		RedisTemplate<String, Object> template = new RedisTemplate<>();
+		template.setConnectionFactory(connectionFactory);
+		template.setKeySerializer(new StringRedisSerializer());
+		template.setValueSerializer(new StringRedisSerializer());
+		template.setHashKeySerializer(new StringRedisSerializer());
+		template.setHashValueSerializer(new StringRedisSerializer());
+		template.afterPropertiesSet();
+		return template;
+	}
+
+	@Bean
+	public MessageListenerAdapter messageListenerAdapter(CacheUtils cacheUtils) {
+		return new MessageListenerAdapter(cacheUtils, "handleClearMessage");
+	}
+ 
+	@Bean
+	public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory,
+			MessageListenerAdapter messageListenerAdapter) {
+		RedisMessageListenerContainer redisMessageListenerContainer = new RedisMessageListenerContainer();
+		redisMessageListenerContainer.setConnectionFactory(redisConnectionFactory);
+		redisMessageListenerContainer.addMessageListener(messageListenerAdapter, new PatternTopic("clearCache"));
+		return redisMessageListenerContainer;
+	}
+}

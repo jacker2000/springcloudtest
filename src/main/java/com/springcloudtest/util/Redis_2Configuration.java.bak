@@ -1,0 +1,46 @@
+package com.springcloudtest.util;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import redis.clients.jedis.JedisPoolConfig;
+
+@Configuration
+public class Redis_2Configuration {
+
+	@Bean(name = "redisTemplate2")
+	public StringRedisTemplate redisTemplate(@Value("${spring.redis_two.host}") String host,
+			@Value("${spring.redis_two.port}") int port, @Value("${spring.redis_two.timeout}") int timeout,
+			@Value("${spring.redis_two.pool.max-active}") int active,
+			@Value("${spring.redis_two.pool.max-idle}") int idle,
+			@Value("${spring.redis_two.pool.max-wait}") int wait) {
+		StringRedisTemplate template = new StringRedisTemplate();
+		template.setConnectionFactory(connectionFactory(host,port,timeout,active,idle,wait));
+		return template;
+	}
+
+	public RedisConnectionFactory connectionFactory(String host, int port, int timeout, int active,
+			int idle, int wait) {
+		JedisConnectionFactory jedis = new JedisConnectionFactory();
+		jedis.setHostName(host);
+		jedis.setPort(port);
+		jedis.setTimeout(timeout);
+		jedis.setPoolConfig(poolCofig(active,idle,wait));
+		jedis.afterPropertiesSet();
+		RedisConnectionFactory factory = jedis;
+		return factory;
+	}
+	
+	public JedisPoolConfig poolCofig(int active,
+			int idle, int wait){
+		JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+		jedisPoolConfig.setMaxIdle(idle);
+		jedisPoolConfig.setMaxWaitMillis(wait);
+		jedisPoolConfig.setMaxTotal(active);
+		return jedisPoolConfig;
+	}
+}
