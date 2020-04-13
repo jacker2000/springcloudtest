@@ -1,5 +1,6 @@
 package com.springcloudtest.rest;
 
+import com.cxytiandi.demo.UserClient;
 import com.springcloudtest.UrlProperties;
 import com.springcloudtest.config.MyConfig;
 import com.springcloudtest.domain.User;
@@ -38,6 +39,9 @@ public class HelloController {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private  UserClient userClient;
 
     @GetMapping("/hello")
     public String hello(){
@@ -123,6 +127,18 @@ public class HelloController {
         }
 
         return "放入缓存成功";
+    }
+    @GetMapping("/hello10")
+    public String hello10(){
+        String name ="";
+        try {
+             name = userClient.getName();
+
+        } catch (Exception e) {
+            return "放入缓存失败";
+        }
+
+        return name;
     }
 //    @RequestMapping(value = "/sendUserTemplate")
 //    @ResponseBody

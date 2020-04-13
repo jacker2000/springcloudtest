@@ -2,6 +2,10 @@ server:
   port: 8082
 
 spring:
+#  自定义装配
+  user:
+    enabled: true
+    name: gf666
   application:
     name: springcloudtest
   datasource: #定义数据源
